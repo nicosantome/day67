@@ -1,3 +1,5 @@
+import datetime
+
 from flask import Flask, render_template, redirect, url_for, request
 from flask_bootstrap import Bootstrap5
 from flask_sqlalchemy import SQLAlchemy
@@ -87,6 +89,19 @@ def add_new_post():
     form = PostForm()
     if request.method == 'GET':
         return render_template("make-post.html", form=form)
+    elif form.validate_on_submit():
+        today = date.today().strftime('%B %d, %Y')
+        new_post = BlogPost(
+            title=form.title.data,
+            subtitle=form.subtitle.data,
+            date=today,
+            body=form.body.data,
+            author=form.author.data,
+            img_url=form.url_img.data
+        )
+        db.session.add(new_post)
+        db.session.commit()
+        return redirect(url_for("get_all_posts"))
 
 
 # TODO: edit_post() to change an existing blog post
