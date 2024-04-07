@@ -88,7 +88,7 @@ def show_post(post_id):
 def add_new_post():
     form = PostForm()
     if request.method == 'GET':
-        return render_template("make-post.html", form=form)
+        return render_template("make-post.html", form=form, new=True)
     elif form.validate_on_submit():
         today = date.today().strftime('%B %d, %Y')
         new_post = BlogPost(
@@ -105,6 +105,27 @@ def add_new_post():
 
 
 # TODO: edit_post() to change an existing blog post
+@app.route('/edit-post/<post_id>', methods=['GET', 'POST'])
+def edit_post(post_id):
+    post = db.session.query(BlogPost).filter_by(id=post_id).scalar()
+    edit_form = PostForm(
+        title=post.title,
+        subtitle=post.subtitle,
+        img_url=post.img_url,
+        author=post.author,
+        body=post.body
+    )
+    if edit_form.validate_on_submit():
+        post.title = edit_form.title.data
+        post.subtitle = edit_form.subtitle.data
+        post.img_url = edit_form.url_img.data
+        post.author = edit_form.author.data
+        post.body = edit_form.body.data
+        db.session.commit()
+        return redirect(url_for("show_post", post_id=post.id))
+
+    return render_template("make-post.html", form=edit_form)
+
 
 # TODO: delete_post() to remove a blog post from the database
 
